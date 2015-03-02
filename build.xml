@@ -16,9 +16,12 @@
 
 	<target name="test" depends="install,test_echo">
 		<exec executable="phpunit" failonerror="true">
+			<arg line="--bootstrap RCMLibs${file.separator}ClassLoader.php test/*" />
+<!--
 			<arg value="--bootstrap" />
 			<arg value="RCMLibs${file.separator}ClassLoader.php" />
 			<arg value="test/*" />
+-->
 		</exec>
 	</target>
 
