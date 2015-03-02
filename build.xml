@@ -2,15 +2,16 @@
 <project name="pms_parser" basedir="." default="test">
 
 	<target name="install">
-		<exec executable="composer">
+		<exec executable="composer" failonerror="true">
 			<arg value="install" />
 		</exec>
 	</target>
 
 
 	<target name="test" depends="install">
-		<exec executable="phpunit">
-			<arg value="--bootstrap RCMLibs/ClassLoader.php" />
+		<exec executable="phpunit" failonerror="true">
+			<arg value="--bootstrap" />
+			<arg value="RCMLibs${file.separator}ClassLoader.php" />
 			<arg value="test/*" />
 		</exec>
 	</target>
