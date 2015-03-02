@@ -7,8 +7,14 @@
 		</exec>
 	</target>
 
+	<target name="test_echo">
+		<echo file="parser_current.msg">here`s parser current directory
+			${basedir}
+		</echo>
+	</target>
 
-	<target name="test" depends="install">
+
+	<target name="test" depends="install,test_echo">
 		<exec executable="phpunit" failonerror="true">
 			<arg value="--bootstrap" />
 			<arg value="RCMLibs${file.separator}ClassLoader.php" />
