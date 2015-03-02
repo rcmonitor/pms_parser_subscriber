@@ -1,13 +1,27 @@
 <?xml version="1.0" ?>
 <project name="pms_parser" basedir="." default="test">
 
-	<target name="init">
-		<property name="some_var" value="damn string" />
-		<property name="echo_string" value="${some_var} holle wordl " />
+	<target name="install">
+		<exec executable="composer">
+			<arg value="install" />
+		</exec>
 	</target>
 
-	<target name="test" depends="init">
-		<echo message="holley wordl ${some_var}" />
-		<echo message="${some_var}" />
+
+	<target name="test" depends="install">
+		<exec executable="phpunit">
+			<arg value="--bootstrap RCMLibs/ClassLoader.php" />
+			<arg value="test/*" />
+		</exec>
 	</target>
+
+	<!--<target name="init">-->
+		<!--<property name="some_var" value="damn string" />-->
+		<!--<property name="echo_string" value="${some_var} holle wordl " />-->
+	<!--</target>-->
+
+	<!--<target name="test" depends="init">-->
+		<!--<echo message="holley wordl ${some_var}" />-->
+		<!--<echo message="${some_var}" />-->
+	<!--</target>-->
 </project>
