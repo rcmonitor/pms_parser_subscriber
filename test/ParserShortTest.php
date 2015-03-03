@@ -32,7 +32,9 @@ class ParserShortTest extends PHPUnit_Framework_TestCase{
 
 
 	public function testShort(){
-		$strShortPage = readfile($this->strPagePath);
+		$strShortPage = file_get_contents($this->strPagePath);
+
+//		Tester::view($strShortPage, 'super short page');
 
 		$oParser = new PMSParser($strShortPage);
 

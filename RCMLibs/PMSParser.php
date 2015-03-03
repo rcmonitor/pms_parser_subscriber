@@ -25,9 +25,15 @@ class PMSParser {
 
 
 	private function setFirstHeaderRE(){
-		$this->firstHeaderRE = '/(?:^<th>(?:<[^>]+>)*?'
-		. '(:<property>[a-zA-Z\\-\\s]+)'
-		. '(?:<[^>]+>)*?<\\/th>\r?\n?)/';
+		$this->firstHeaderRE = '/'
+			. '(^(?:'
+			. '(?:\s*)'
+			. '<th>'
+			. '(?:<[^>]+>)*?'
+			. '(?<property>[a-zA-Z\-\s]+)'
+			. '(?:<[^>]+>)*?<\/th>\r?\n?'
+			. ')$\n)'
+			. '/m';
 
 	}
 
@@ -45,14 +51,12 @@ class PMSParser {
 
 		$arMatches = array();
 
-		$intParsed = preg_match_all($this->firstHeaderRE, $this->page, $arMatches);
+		$intParsed = preg_match_all($this->firstHeaderRE, $this->page, $arMatches, PREG_SET_ORDER);
 
 		if($intParsed !== false){
 			$this->parsed = $arMatches;
 			$boolReturn = true;
 		}
-
-		var_dump($this->parsed);
 
 		return $boolReturn;
 	}
