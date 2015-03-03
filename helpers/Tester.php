@@ -5,7 +5,7 @@
  * Time: 19:01
  */
 
-namespace cox\backend\scoringModeller\helpers;
+namespace helpers;
 
 
 class Tester{
