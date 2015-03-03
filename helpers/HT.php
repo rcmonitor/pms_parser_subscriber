@@ -53,7 +53,7 @@ class HT {
 	public static function header($strClassName){
 
 		$intClassNameLength = strlen($strClassName);
-		$intRepeats = (172 - $intClassNameLength) / 2;
+		$intRepeats = (127 - $intClassNameLength) / 2;
 
 		$strStars = str_repeat('*', $intRepeats);
 		echo "\n" . $strStars . 'tests in ' . $strClassName . ' started' . $strStars . "\n";

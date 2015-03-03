@@ -5,9 +5,13 @@
  * Time: 12:20
  */
 
-use helpers\HT;
 
-class TestPHPUnitSelf extends PHPUnit_Framework_TestCase{
+namespace test;
+
+use helpers\HT;
+use PHPUnit_Framework_TestCase;
+
+class PHPUnitSelfTest extends PHPUnit_Framework_TestCase{
 
 
 	public static function setUpBeforeClass(){
