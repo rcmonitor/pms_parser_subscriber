@@ -8,6 +8,7 @@
 namespace RCMLibs;
 
 
+use adaptors\FixFuckUps;
 use adaptors\FootNote;
 use adaptors\Unknown;
 use base\bErroneous;
@@ -99,7 +100,7 @@ class PMSXMLParser extends bErroneous implements iParser{
 			$oRow = $oRows->item($intRowOffset);
 			$oCells = $oRow->getElementsByTagName('td');
 
-			$strSoftwareName = $oCells->item(0)->nodeValue;
+			$strSoftwareName = FixFuckUps::matchWare($oCells->item(0)->nodeValue);
 			$intAddedRowOffset = $this->getRowOffsetBuySoftwareName($strSoftwareName);
 			if($intAddedRowOffset !== false){
 				$intColumnOffset = 1;
