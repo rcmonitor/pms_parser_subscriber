@@ -46,6 +46,6 @@ class ParserShortTest extends PHPUnit_Framework_TestCase{
 		$this->assertNotEmpty($arParsed, 'parsed array is empty');
 		$this->assertNotEmpty($arParsed[0], 'nothing found');
 
-		Tester::view($arParsed, 'parsed array');
+//		Tester::view($arParsed, 'parsed array');
 	}
 }

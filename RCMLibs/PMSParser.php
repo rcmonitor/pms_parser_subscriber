@@ -7,7 +7,9 @@
 
 namespace RCMLibs;
 
-class PMSParser {
+use interfaces\iParser;
+
+class PMSParser implements iParser{
 
 	/**
 	 * @var string
