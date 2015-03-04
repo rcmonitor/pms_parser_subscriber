@@ -28,11 +28,13 @@ class PMSPageWorker {
 			
 			echo 'message successfully parsed' . "\n";
 			
-			$arParsed = $oParser->getParsed();
-			$strJsonParsed = json_encode($arParsed);
+//			$arParsed = $oParser->getParsed();
+//			$strJsonParsed = json_encode($arParsed);
+
+			$arJSONParsed = $oParser->toJSON();
 			
 			$oPublisher = new AMQPPublisher();
-			$oPublisher->publish($strJsonParsed);
+			$oPublisher->publish($arJSONParsed);
 			$oPublisher = null;
 		}
 	}

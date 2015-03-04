@@ -7,6 +7,7 @@
 
 namespace RCMLibs;
 
+use helpers\Tester;
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
@@ -94,20 +95,40 @@ class AMQPPublisher {
 	}
 	
 	
-	public function publish($strMsg){
+	public function publish($msg){
 		$channel = $this->connection->channel();
 		$channel->exchange_declare(...array_values($this->exchangeProperties));
 		$channel->queue_declare(...array_values($this->queueProperties));
 		
 		$channel->queue_bind($this->queueName, $this->exchangeName, $this->routingKey);
 
-		$oMsg = new AMQPMessage($strMsg, array(
-			'delivery_mode' => 2
-		));
-		
-		$channel->basic_publish($oMsg, $this->exchangeName, $this->routingKey);
-		
-		echo 'message published to ' . $this->routingKey . "\n";
+		$strMsgType = gettype($msg);
+		if($strMsgType == 'string'){
+			$oMsg = new AMQPMessage($msg, array(
+				'delivery_mode' => 2
+			));
+
+			$channel->basic_publish($oMsg, $this->exchangeName, $this->routingKey);
+
+			$strOutputMsg = 'message published to ' . $this->routingKey . "\n";
+			$strOutputMsg .= $msg;
+			Tester::ec($strOutputMsg);
+
+		}elseif($strMsgType == 'array'){
+			foreach ($msg as $intOffset => $strMsg) {
+				$oMsg = new AMQPMessage($strMsg, array(
+					'delivery_mode' => 2
+				));
+				$channel->basic_publish($oMsg, $this->exchangeName, $this->routingKey);
+
+				$strOutputMsg = 'message #' . $intOffset . ' published to ' . $this->routingKey . ':' . "\n";
+				$strOutputMsg .= $strMsg;
+
+				Tester::ec($strOutputMsg);
+			}
+
+		}
+
 
 		$channel->close();
 	}
