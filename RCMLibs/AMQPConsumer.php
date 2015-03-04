@@ -99,14 +99,14 @@ class AMQPConsumer {
 
 		$this->consumeProperties = array(
 			'queue' => $this->queueName
-		, 'consumer_tag' => $this->routingKey
-		, 'no_local' => false
-		, 'no_acknowledge' => false
-		, 'exclusive' => false
-		, 'nowait' => false
-		, 'callback' => array('RCMLibs\PMSPageWorker', 'perform')
-		, 'ticket' => null
-		, 'arguments' => array()
+			, 'consumer_tag' => $this->routingKey
+			, 'no_local' => false
+			, 'no_acknowledge' => false
+			, 'exclusive' => false
+			, 'nowait' => false
+			, 'callback' => array('RCMLibs\PMSPageWorker', 'perform')
+			, 'ticket' => null
+			, 'arguments' => array()
 		);
 
 	}
@@ -115,9 +115,13 @@ class AMQPConsumer {
 	public function consume(){
 		$channel = $this->connection->channel();
 		$this->timer->lap('got new channel');
-		$channel->exchange_declare(...array_values($this->exchangeProperties));
+		$resultChannelDeclare = $channel->exchange_declare(...array_values($this->exchangeProperties));
+
+		Tester::view($resultChannelDeclare, 'channel declare result');
+
 		$this->timer->lap('got exchange');
-		$channel->queue_declare(...array_values($this->queueProperties));
+		$resultQueueDeclare = $channel->queue_declare(...array_values($this->queueProperties));
+		Tester::view($resultQueueDeclare, 'queue declare result');
 		$this->timer->lap('got queue');
 
 

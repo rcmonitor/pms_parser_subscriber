@@ -64,4 +64,33 @@ class ParserXMLTest extends PHPUnit_Framework_TestCase{
 
 	}
 
+
+	public function testJSON(){
+		$oParser = new PMSXMLParser($this->page);
+
+		$boolParsed = $oParser->parse();
+		$this->assertTrue($boolParsed, 'failed to parse');
+
+		$boolHasErrors = $oParser->hasErrors();
+
+		$arErrors = $oParser->getErrors();
+		$this->assertEmpty($arErrors, 'errors not empty');
+
+		$this->assertFalse($boolHasErrors, 'got some errors while parsing');
+
+		$arParsed = $oParser->getParsed();
+		$intParsedCount = count($arParsed[0]['values']);
+
+		$arJSONParsed = $oParser->toJSON();
+
+		$this->assertCount($intParsedCount, $arJSONParsed, 'wrong count of json array');
+
+//		Tester::view($arJSONParsed, 'json parsed');
+
+		foreach ($arJSONParsed as $intOffset => $strValue) {
+			$this->assertInternalType('string', $strValue, 'wrong type of json for #' . $intOffset);
+		}
+
+	}
+
 }

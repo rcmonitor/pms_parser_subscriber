@@ -13,12 +13,13 @@ use adaptors\FootNote;
 use adaptors\Unknown;
 use base\bErroneous;
 use helpers\Tester;
+use interfaces\iJSONable;
 use interfaces\iParser;
 use DOMDocument;
 use DOMElement;
 use DOMNodeList;
 
-class PMSXMLParser extends bErroneous implements iParser{
+class PMSXMLParser extends bErroneous implements iParser, iJSONable{
 
 
 	private $dom;
@@ -197,5 +198,25 @@ class PMSXMLParser extends bErroneous implements iParser{
 
 	public function getParsed(){
 		return $this->parsed;
+	}
+
+
+	public function toJSON(){
+		$arEncoded = array();
+
+		$intParsedColumns = count($this->parsed);
+		if($intParsedColumns > 0){
+			$intParsedRows = count($this->parsed[0]['values']);
+
+			for($i = 0; $i < $intParsedRows; $i ++){
+				$arTemp = array();
+				for($j = 0; $j < $intParsedColumns; $j ++){
+					$arTemp[$this->parsed[$j]['header']] = $this->parsed[$j]['values'][$i];
+				}
+				$arEncoded[] = json_encode($arTemp);
+			}
+		}
+
+		return $arEncoded;
 	}
 }
