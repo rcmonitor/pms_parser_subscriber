@@ -7,6 +7,7 @@
 
 namespace RCMLibs;
 
+use helpers\Tester;
 use PhpAmqpLib\Connection\AMQPConnection;
 
 class AMQPConsumer {
@@ -41,10 +42,23 @@ class AMQPConsumer {
 	
 	private $timer;
 
+
+	private $timeStarted;
+
+
+	/**
+	 * @var int timeout in seconds
+	 */
+	private $timeout;
+
 	
 	public function __construct(){
 		
 		$this->timer = new Timer(true, __CLASS__ . ' constructed');
+
+		$this->timeout = 2;
+
+		$this->timeStarted = Timer::ft();
 
 		$this->initParameters();
 
@@ -106,7 +120,7 @@ class AMQPConsumer {
 		$channel->queue_declare(...array_values($this->queueProperties));
 		$this->timer->lap('got queue');
 
-		$channel->queue_bind($this->queueName, $this->exchangeName, $this->routingKey);
+
 
 
 		echo 'waiting for messages' . "\n";
@@ -114,15 +128,43 @@ class AMQPConsumer {
 		$channel->basic_consume(...array_values($this->consumeProperties));
 		$this->timer->lap('channel subscribed');
 
-		while(count($channel->callbacks)) {
-			$channel->wait();
+		if(!empty($this->timeout)){
+			$this->waitWithTimeout($channel);
+		}else{
+			$this->waitForever($channel);
 		}
 
 		$channel->close();
+		Tester::ec('channel closed');
+	}
+
+
+	private function waitWithTimeout($channel){
+		while(count($channel->callbacks)) {
+			try{
+				$channel->wait(null, false, $this->timeout);
+			}catch (\Exception $e){
+
+				if($e->getCode() === 0){
+					$strMsg = 'resumed by timeout of ' . $this->timeout . "\n";
+					Tester::ec($strMsg);
+					break;
+				}
+			}
+		}
+
+	}
+
+
+	private function waitForever($channel){
+		while(count($channel->callbacks)){
+			$channel->wait();
+		}
 	}
 
 
 	public function __destruct(){
 		$this->connection->close();
+		Tester::ec('connection closed');
 	}
 }

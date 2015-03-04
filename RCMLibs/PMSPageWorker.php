@@ -13,15 +13,17 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 class PMSPageWorker {
 
+
+	private static function getParser($strPage){
+		return new PMSXMLParser($strPage);
+	}
+
 	
 	public static function perform(AMQPMessage $oMsg){
 		
 		echo 'got message' . "\n";
 
-//		var_dump($strMsg);
-//		die();
-		
-		$oParser = new PMSParser($oMsg->body);
+		$oParser = self::getParser($oMsg->body);
 		if($oParser->parse()){
 			
 			echo 'message successfully parsed' . "\n";
