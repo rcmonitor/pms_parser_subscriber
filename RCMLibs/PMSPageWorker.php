@@ -7,6 +7,8 @@
 
 namespace RCMLibs;
 
+use helpers\Tester;
+use PhpAmqpLib\Channel\AMQPChannel;
 use RCMLibs\PMSParser;
 use RCMLibs\AMQPPublisher;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -14,14 +16,28 @@ use PhpAmqpLib\Message\AMQPMessage;
 class PMSPageWorker {
 
 
+	private $channel;
+
+
 	private static function getParser($strPage){
 		return new PMSXMLParser($strPage);
 	}
 
+
+	public function __construct(AMQPChannel $channel){
+		$this->channel = $channel;
+	}
+
 	
-	public static function perform(AMQPMessage $oMsg){
+	public function perform(AMQPMessage $oMsg){
 		
 		echo 'got message' . "\n";
+
+		$arDelivery = $oMsg->delivery_info;
+//		Tester::view($arDelivery, 'delivery info');
+//		Tester::view($oMsg, 'amqp message');
+
+//		Tester::view($var, 'var');
 
 		$oParser = self::getParser($oMsg->body);
 		if($oParser->parse()){
@@ -36,6 +52,14 @@ class PMSPageWorker {
 			$oPublisher = new AMQPPublisher();
 			$oPublisher->publish($arJSONParsed);
 			$oPublisher = null;
+
+//			$this->channel->basic_ack($arDelivery['delivery_tag']);
+
+			/**
+			 * @type AMQPChannel $oChannel
+			 */
+			$oChannel = $arDelivery['channel'];
+			$oChannel->basic_ack($arDelivery['delivery_tag']);
 		}
 	}
 }

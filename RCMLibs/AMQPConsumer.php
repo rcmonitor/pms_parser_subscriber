@@ -9,6 +9,7 @@ namespace RCMLibs;
 
 use helpers\Tester;
 use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Channel\AMQPChannel;
 
 class AMQPConsumer {
 	
@@ -35,15 +36,30 @@ class AMQPConsumer {
 	
 	
 	private $queueProperties;
-	
-	
+
+
+	/**
+	 * @var AMQPConnection
+	 */
 	private $connection;
+
+
+	/**
+	 * @var AMQPChannel
+	 */
+	private $channel;
 	
 	
 	private $timer;
 
 
 	private $timeStarted;
+
+
+	/**
+	 * @var PMSPageWorker
+	 */
+	private $worker;
 
 
 	/**
@@ -63,6 +79,12 @@ class AMQPConsumer {
 		$this->initParameters();
 
 		$this->connection = new AMQPConnection(...self::CONNECTION_PARAMETERS['rabbit']);
+		
+		$this->channel = $this->connection->channel();
+
+		$this->worker = new PMSPageWorker($this->channel);
+
+		$this->initConsumerParameters();
 		
 		$this->timer->lap('connected');
 	}
@@ -97,56 +119,57 @@ class AMQPConsumer {
 		, 'ticket' => null
 		);
 
+	}
+	
+	
+	private function initConsumerParameters(){
+
 		$this->consumeProperties = array(
 			'queue' => $this->queueName
-			, 'consumer_tag' => $this->routingKey
-			, 'no_local' => false
-			, 'no_acknowledge' => false
-			, 'exclusive' => false
-			, 'nowait' => false
-			, 'callback' => array('RCMLibs\PMSPageWorker', 'perform')
-			, 'ticket' => null
-			, 'arguments' => array()
+		, 'consumer_tag' => $this->routingKey
+		, 'no_local' => false
+		, 'no_acknowledge' => false
+		, 'exclusive' => false
+		, 'nowait' => false
+		, 'callback' => array($this->worker, 'perform')
+		, 'ticket' => null
+		, 'arguments' => array()
 		);
-
 	}
 	
 	
 	public function consume(){
-		$channel = $this->connection->channel();
 		$this->timer->lap('got new channel');
-		$resultChannelDeclare = $channel->exchange_declare(...array_values($this->exchangeProperties));
+		$resultChannelDeclare = $this->channel->exchange_declare(...array_values($this->exchangeProperties));
 
 		Tester::view($resultChannelDeclare, 'channel declare result');
 
 		$this->timer->lap('got exchange');
-		$resultQueueDeclare = $channel->queue_declare(...array_values($this->queueProperties));
+		$resultQueueDeclare = $this->channel->queue_declare(...array_values($this->queueProperties));
+
 		Tester::view($resultQueueDeclare, 'queue declare result');
 		$this->timer->lap('got queue');
 
-
-
-
 		echo 'waiting for messages' . "\n";
 		
-		$channel->basic_consume(...array_values($this->consumeProperties));
+		$resultConsumerTag = $this->channel->basic_consume(...array_values($this->consumeProperties));
 		$this->timer->lap('channel subscribed');
 
 		if(!empty($this->timeout)){
-			$this->waitWithTimeout($channel);
+			$this->waitWithTimeout($this->channel);
 		}else{
-			$this->waitForever($channel);
+			$this->waitForever($this->channel);
 		}
 
-		$channel->close();
+		$this->channel->close();
 		Tester::ec('channel closed');
 	}
 
 
-	private function waitWithTimeout($channel){
-		while(count($channel->callbacks)) {
+	private function waitWithTimeout(){
+		while(count($this->channel->callbacks)) {
 			try{
-				$channel->wait(null, false, $this->timeout);
+				$this->channel->wait(null, false, $this->timeout);
 			}catch (\Exception $e){
 
 				if($e->getCode() === 0){
@@ -160,9 +183,9 @@ class AMQPConsumer {
 	}
 
 
-	private function waitForever($channel){
-		while(count($channel->callbacks)){
-			$channel->wait();
+	private function waitForever(){
+		while(count($this->channel->callbacks)){
+			$this->channel->wait();
 		}
 	}
 

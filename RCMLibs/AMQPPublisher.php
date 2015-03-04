@@ -112,7 +112,7 @@ class AMQPPublisher {
 
 			$strOutputMsg = 'message published to ' . $this->routingKey . "\n";
 			$strOutputMsg .= $msg;
-			Tester::ec($strOutputMsg);
+//			Tester::ec($strOutputMsg);
 
 		}elseif($strMsgType == 'array'){
 			foreach ($msg as $intOffset => $strMsg) {
@@ -124,7 +124,7 @@ class AMQPPublisher {
 				$strOutputMsg = 'message #' . $intOffset . ' published to ' . $this->routingKey . ':' . "\n";
 				$strOutputMsg .= $strMsg;
 
-				Tester::ec($strOutputMsg);
+//				Tester::ec($strOutputMsg);
 			}
 
 		}
